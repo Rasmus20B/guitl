@@ -146,18 +146,15 @@ template<typename List,
   using value = List;
   };
 
-template<typename Haystack, typename Needle>
-struct count_frequencyT;
+template<template<typename> typename Pred, typename List>
+consteval int count_frequencyT(List) {
+  return Pred<Front<List>>{} + count_frequencyT<Pred>(PopFront<List>{});
+}
 
-template<typename Haystack, typename Needle>
-struct count_frequencyT {
-  static constexpr int value = std::is_same_v<Front<Haystack>, Needle> + count_frequencyT<PopFront<Haystack>, Needle>::value;
-};
-
-template<typename Needle>
-struct count_frequencyT<Typelist<>, Needle> {
-  static constexpr int value = 0;
-};
+template<template<typename> typename Pred>
+consteval int count_frequencyT(Typelist<>) {
+  return 0;
+}
 
 template<template<typename> typename Pred, typename Result>
 consteval auto filterT(Result result, Typelist<>) {
@@ -176,15 +173,9 @@ consteval auto filterT(Result result, List) {
 template<template<typename T> typename Pred, typename List>
 using filter = std::decay_t<decltype(filterT<Pred>(Typelist<>{}, List{}))>;
 
-template<typename List>
-struct zip_occurencesT;
+template<template<typename T> typename Pred, typename List>
+inline static constexpr int count_frequency = (count_frequencyT<Pred>(List{}));
 
 template<typename List> 
 inline static constexpr size_t count_unique = count_uniqueT<Front<List>, Front<PopFront<List>>, PopFront<List>>::value;
-
-template<typename List, typename Needle>
-inline static constexpr size_t count_frequency = count_frequencyT<List, Needle>::value;
-
-template<typename List>
-inline static constexpr std::array<std::pair<std::string_view, int>, count_unique<InsertionSort<List, type_cmp>>> zip_occurences = zip_occurencesT<List>::value;
 }
