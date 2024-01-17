@@ -5,9 +5,7 @@
 
 namespace guitl {
 
-  struct Widget {
-
-  };
+  struct Widget {};
 
   template<typename T>
   struct WidgetCRTP : public Widget {

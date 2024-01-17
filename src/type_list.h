@@ -4,15 +4,28 @@
 #include <string_view>
 #include <source_location>
 
+namespace guitl {
+
 template<typename T>
 struct Identity {
   using value = T;
 };
 
+
 template<typename... Elems>
 struct Typelist {
   static inline constexpr size_t size = sizeof...(Elems);
 };
+
+template<typename T1, typename ...T2>
+consteval auto append(T1, T2...) {
+  return Typelist<T1, T2...>{};
+}
+
+template<typename ...T2>
+consteval auto append(Typelist<>, T2...) {
+  return Typelist<T2...>{};
+}
 
 template<typename List>
 struct FrontT;
@@ -133,7 +146,7 @@ template<typename List,
   using value = List;
   };
 
-template<typename haystack, typename needle>
+template<typename Haystack, typename Needle>
 struct count_frequencyT;
 
 template<typename Haystack, typename Needle>
@@ -146,9 +159,32 @@ struct count_frequencyT<Typelist<>, Needle> {
   static constexpr int value = 0;
 };
 
+template<template<typename> typename Pred, typename Result>
+consteval auto filterT(Result result, Typelist<>) {
+  return result;
+}
+
+template<template<typename> typename Pred, typename Result, typename List>
+consteval auto filterT(Result result, List) {
+  if constexpr(Pred<Front<List>>{}) {
+    return filterT<Pred>(append(result, Front<List>{}), PopFront<List>{});
+  } else {
+    return filterT<Pred>(result, PopFront<List>{});
+  }
+}
+
+template<template<typename T> typename Pred, typename List>
+using filter = std::decay_t<decltype(filterT<Pred>(Typelist<>{}, List{}))>;
+
+template<typename List>
+struct zip_occurencesT;
+
 template<typename List> 
 inline static constexpr size_t count_unique = count_uniqueT<Front<List>, Front<PopFront<List>>, PopFront<List>>::value;
 
 template<typename List, typename Needle>
 inline static constexpr size_t count_frequency = count_frequencyT<List, Needle>::value;
 
+template<typename List>
+inline static constexpr std::array<std::pair<std::string_view, int>, count_unique<InsertionSort<List, type_cmp>>> zip_occurences = zip_occurencesT<List>::value;
+}
