@@ -2,6 +2,7 @@
 
 #include <numeric>
 #include <array>
+#include <source_location>
 #include <type_traits>
 #include <vector>
 #include <memory>
@@ -10,6 +11,7 @@
 #include "widget.h"
 
 namespace guitl {
+
 
   template<typename T, int N>
   consteval std::array<T, N> create_iota_array() {
@@ -31,7 +33,7 @@ namespace guitl {
     }
 
     consteval static_gui(W&& ...Args) : widget_types(create_iota_array<id_type, sizeof...(W)>()),
-      registry(generate_static_registry<sizeof...(W)>(std::forward<W>(Args)...)) {}
+      registry(generate_static_registry(std::forward<W>(Args)...)) {}
 
     pool_type widget_types{}; 
     registry_type registry{};
