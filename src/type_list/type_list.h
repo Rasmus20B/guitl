@@ -11,7 +11,6 @@ struct Identity {
   using value = T;
 };
 
-
 template<typename... Elems>
 struct Typelist {
   static inline constexpr size_t size = sizeof...(Elems);
@@ -72,6 +71,16 @@ struct PushFrontT <Typelist<List...>, Element> {
 
 template<typename List, typename Element>
 using PushFront = typename PushFrontT<List, Element>::value;
+
+template<typename List, typename Element>
+struct PushBackT;
+
+template<typename... List, typename Element>
+struct PushBackT <Typelist<List...>, Element> {
+  using value = Typelist<List..., Element>;
+};
+template<typename List, typename Element>
+using PushBack = typename PushBackT<List, Element>::value;
 
 template<typename A, typename B, typename Tail>
 struct count_uniqueT {
@@ -147,22 +156,22 @@ template<typename List,
   };
 
 template<template<typename> typename Pred, typename List>
-consteval int count_frequencyT(List) {
+[[nodiscard]] consteval int count_frequencyT(List) noexcept {
   return Pred<Front<List>>{} + count_frequencyT<Pred>(PopFront<List>{});
 }
 
 template<template<typename> typename Pred>
-consteval int count_frequencyT(Typelist<>) {
+[[nodiscard]] consteval int count_frequencyT(Typelist<>) {
   return 0;
 }
 
 template<template<typename> typename Pred, typename Result>
-consteval auto filterT(Result result, Typelist<>) {
+[[nodiscard]] consteval auto filterT(Result result, Typelist<>) noexcept {
   return result;
 }
 
 template<template<typename> typename Pred, typename Result, typename List>
-consteval auto filterT(Result result, List) {
+[[nodiscard]] consteval auto filterT(Result result, List) noexcept {
   if constexpr(Pred<Front<List>>{}) {
     return filterT<Pred>(append(result, Front<List>{}), PopFront<List>{});
   } else {
@@ -173,8 +182,53 @@ consteval auto filterT(Result result, List) {
 template<template<typename T> typename Pred, typename List>
 using filter = std::decay_t<decltype(filterT<Pred>(Typelist<>{}, List{}))>;
 
+template<typename T, typename Result>
+[[nodiscard]] consteval auto filter_on_typeT(Result result, Typelist<>) noexcept {
+  return result;
+}
+
+template<typename T, typename Result, typename List>
+[[nodiscard]] consteval auto filter_on_typeT(Result result, List) noexcept {
+  if constexpr(std::is_same_v<T, Front<List>>) {
+    return filter_on_typeT<T>(append(result, Front<List>{}), PopFront<List>{});
+  } else {
+    return filter_on_typeT<T>(result, PopFront<List>{});
+  }
+}
+template<typename T, typename List>
+using filter_on_type = std::decay_t<decltype(filter_on_typeT<T>(Typelist<>{}, List{}))>;
+
+template<typename List, typename Result>
+struct remove_duplicatesT {
+  using value = std::conditional<std::is_same_v<Front<List>, Front<PopFront<List>>>,
+        typename remove_duplicatesT<PopFront<List>, Result>::value,
+        typename remove_duplicatesT<PopFront<List>, PushBack<Result, Front<List>>>::value
+          >::type;
+};
+
+template<typename Result>
+struct remove_duplicatesT<Typelist<>, Result> {
+  using value = Result;
+};
+
+template<typename T, typename List>
+consteval int count_frequency_of_typeT(List) {
+  return std::is_same_v<T, Front<List>> + count_frequency_of_typeT<T>(PopFront<List>{});
+}
+
+template<typename T>
+consteval int count_frequency_of_typeT(Typelist<>) {
+  return 0;
+}
+
+template<typename List>
+using remove_duplicates = remove_duplicatesT<InsertionSort<List, type_cmp>, Typelist<>>::value;
+
 template<template<typename T> typename Pred, typename List>
 inline static constexpr int count_frequency = (count_frequencyT<Pred>(List{}));
+
+template<typename T, typename List>
+inline static constexpr int count_frequency_of_type = count_frequency_of_typeT<T>(List{});
 
 template<typename List> 
 inline static constexpr size_t count_unique = count_uniqueT<Front<List>, Front<PopFront<List>>, PopFront<List>>::value;

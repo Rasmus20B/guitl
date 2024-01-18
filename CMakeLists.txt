@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SOURCE_FILES 
   src/guitl.cc
   src/sparse_set.h
-  src/type_list.h
+  src/type_list/type_list.h
   )
 
 add_compile_options(

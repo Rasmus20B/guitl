@@ -2,9 +2,11 @@
 
 #include <numeric>
 #include <array>
+#include <type_traits>
+#include <vector>
 #include <memory>
 
-#include "type_list.h"
+#include "type_list/type_list.h"
 #include "widget.h"
 
 namespace guitl {
@@ -18,16 +20,14 @@ namespace guitl {
 
   template<typename id_type = uint32_t, typename... W>
   struct static_gui {
+    using widgets = InsertionSort<Typelist<W...>, type_cmp>;
+    static constexpr auto n_unique_widgets = count_unique<widgets>;
     using pool_type = std::array<id_type, sizeof...(W)>;
-    using registry_type = std::array<std::array<std::shared_ptr<Widget>, 64>, count_unique<InsertionSort<Typelist<W...>, type_cmp>>>;
+    using registry_type = std::array<std::vector<Widget>, n_unique_widgets>;
 
-    consteval auto counter(auto ...Args, int c) {
-      return c + 1;
-    }
-
-    template<size_t c>
     consteval registry_type generate_static_registry(W&&...Args) {
-      return {};
+      registry_type res;
+      return res;
     }
 
     consteval static_gui(W&& ...Args) : widget_types(create_iota_array<id_type, sizeof...(W)>()),

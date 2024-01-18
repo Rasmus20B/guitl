@@ -15,6 +15,7 @@ namespace guitl {
   };
 
   struct Button : WidgetCRTP<Button> {
+    consteval Button() = default;
     consteval Button(const uint32_t x, const uint32_t y) : m_x(x), m_y(y) {}
 
     void print() override {
@@ -24,7 +25,8 @@ namespace guitl {
     uint32_t m_y;
   };
 
-  struct Textbox : WidgetCRTP<Button> {
+  struct Textbox : WidgetCRTP<Textbox> {
+    consteval Textbox() = default;
     consteval Textbox(const uint32_t x, const uint32_t y, std::string_view text) : m_x(x), m_y(y), m_text(text) {}
 
     void print() override {
