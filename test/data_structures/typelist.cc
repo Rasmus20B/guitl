@@ -1,4 +1,5 @@
 #include "../../src/type_list/type_list.h"
+#include "../../src/widget.h"
 #include <gtest/gtest.h>
 #include <type_traits>
 
@@ -15,7 +16,7 @@ template<>
 struct is_char<char> : std::true_type{};
 
 template<typename T>
-constexpr void print() {
+void print() {
   std::cout << std::source_location::current().function_name() << "\n";
 }
 
@@ -31,6 +32,18 @@ static_assert(std::is_same_v<remove_duplicates<list>, Typelist<char, float, int,
 
 static_assert(std::is_same_v<filter_on_type<int, list>, Typelist<int>>);
 
+static_assert(guitl::type_code<guitl::Button>::value != guitl::type_code<guitl::Textbox>::value);
+
 int main() {
   print<at<list, 0>>();
+  print<at<list, 1>>();
+  print<at<list, 2>>();
+  print<at<list, 3>>();
+  print<at<list, 4>>();
+  print<at<list, 5>>();
+  print<at<list, 6>>();
+  print<at<list, 7>>();
+
+  std::cout << guitl::type_code<guitl::Button>::value << "\n";
+  std::cout << guitl::type_code<guitl::Textbox>::value << "\n";
 }

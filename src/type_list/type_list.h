@@ -17,7 +17,6 @@ struct Typelist {
   static inline constexpr size_t size = sizeof...(Elems);
 };
 
-
 template<typename T1, typename ...T2>
 consteval auto append(T1, T2...) {
   return Typelist<T1, T2...>{};
@@ -250,8 +249,21 @@ consteval int count_frequency_of_typeT(Typelist<>) {
 template<typename List>
 using remove_duplicates = remove_duplicatesT<InsertionSort<List, type_cmp>, Typelist<>>::value;
 
+template<auto start, auto end, auto inc, class F>
+constexpr void constexpr_for_n(F&& f) {
+  if constexpr(start < end) {
+    f(std::integral_constant<decltype(start), start>());
+    constexpr_for_n<start + inc, end, inc>(f);
+  }
+}
+
+template<typename F, typename... Args>
+constexpr void constexpr_for(F&& f, Args&&... args) {
+  (f(std::forward<Args>(args)), ...);
+}
+
 template<template<typename T> typename Pred, typename List>
-inline static constexpr int count_frequency = (count_frequencyT<Pred>(List{}));
+inline static constexpr int count_frequency = count_frequencyT<Pred>(List{});
 
 template<typename T, typename List>
 inline static constexpr int count_frequency_of_type = count_frequency_of_typeT<T>(List{});

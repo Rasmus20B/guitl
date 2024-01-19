@@ -1,4 +1,12 @@
 #include "../../src/guitl.h"
+#include "../../src/type_list/type_list.h"
+
+#include <typeinfo>
+
+template<typename T>
+void print() {
+  std::cout << std::source_location::current().function_name() << "\n";
+}
 
 int main() {
 
@@ -12,7 +20,21 @@ int main() {
 
   std::cout << "Number of different Widgets Types: " << layout.registry.size() << "\n";
 
-  for(auto i: layout.registry) {
-    std::cout << "Widget " << i.size() << "\n";
+  for(int i = 0; i < layout.registry.size(); ++i) {
+    std::cout << "===========\n";
+    std::cout << "This is the " << typeid(layout.registry[i][0]).name() << "\n";
+    if(i == 0) {
+      for(auto j: layout.registry[i]) {
+        std::cout << "Found a button. \n" ;
+      }
+    } else if(i == 1) {
+      for(auto j: layout.registry[i]) {
+        std::cout << "Found a Textbox.\n";
+      }
+    } else {
+      for(auto j: layout.registry[i]) {
+        std::cout << "Found something or other.\n";
+      }
+    }
   }
 }
