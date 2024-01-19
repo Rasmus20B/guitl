@@ -5,7 +5,14 @@
 #include <string_view>
 #include <source_location>
 
+#include <iostream>
+
 namespace guitl {
+
+template<typename T>
+void print() {
+  std::cout << std::source_location::current().function_name() << "\n";
+}
 
 template<typename T>
 struct Identity {

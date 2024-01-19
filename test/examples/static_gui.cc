@@ -10,6 +10,11 @@ void print() {
 
 int main() {
 
+  std::tuple<std::array<int, 4>> hello{};
+
+  std::cout << std::get<0>(hello)[0] << "\n";
+
+
   static constinit guitl::static_gui layout {
     guitl::Button(20, 40),
     guitl::Textbox(50, 90, "Hello"),
@@ -19,6 +24,8 @@ int main() {
   };
 
   std::cout << "Number of different Widgets Types: " << layout.registry.size() << "\n";
+
+  layout.print_all_types([](auto value) {return;});
 
   for(int i = 0; i < layout.registry.size(); ++i) {
     std::cout << "===========\n";

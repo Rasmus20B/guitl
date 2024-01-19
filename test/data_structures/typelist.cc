@@ -15,10 +15,6 @@ struct is_char : std::false_type{};
 template<>
 struct is_char<char> : std::true_type{};
 
-template<typename T>
-void print() {
-  std::cout << std::source_location::current().function_name() << "\n";
-}
 
 using list = Typelist<char, float, int, std::string, long, char, float, float>;
 static_assert(count_unique<InsertionSort<list, type_cmp>> == 5);
@@ -31,6 +27,8 @@ static_assert(count_frequency_of_type<int, filter<is_int, list>> == 1);
 static_assert(std::is_same_v<remove_duplicates<list>, Typelist<char, float, int, long, std::string>>);
 
 static_assert(std::is_same_v<filter_on_type<int, list>, Typelist<int>>);
+
+static_assert(remove_duplicates<list>::size == count_unique<InsertionSort<list, type_cmp>>);
 
 static_assert(guitl::type_code<guitl::Button>::value != guitl::type_code<guitl::Textbox>::value);
 
